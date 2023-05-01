@@ -14,6 +14,7 @@ renew_nomad_certificates_info:
   common_name: nomad01.example.com
   ttl: 90d
   is_server: true
+  is_client: true
   include_nomad_service: true
 renew_nomad_certificates_nomad_dc_name: dc1.nomad
 renew_nomad_certificates_nomad_service_name: nomad.service.nomad

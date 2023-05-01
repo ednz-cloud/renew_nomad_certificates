@@ -1,0 +1,16 @@
+[Unit]
+Description=Automatic renewal of nomad certificate using consul-template
+Requires=network-online.target
+After=network-online.target nomad.service
+ConditionFileNotEmpty={{ renew_nomad_certificates_config_dir }}/nomad_config.hcl
+
+[Service]
+User={{ renew_nomad_certificates_nomad_user }}
+Group={{ renew_nomad_certificates_nomad_group }}
+ExecStart=/usr/bin/nomad-template $OPTIONS -config={{ renew_nomad_certificates_config_dir }}/nomad_config.hcl
+ExecReload=/bin/kill --signal HUP $MAINPID
+KillSignal=SIGINT
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

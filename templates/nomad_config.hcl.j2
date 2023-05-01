@@ -1,0 +1,33 @@
+vault {
+  address      = "{{ renew_nomad_certificates_vault_addr }}"
+  token        = "{{ renew_nomad_certificates_vault_token }}"
+  unwrap_token = {{ renew_nomad_certificates_vault_token_unwrap|lower }}
+  renew_token  = {{ renew_nomad_certificates_vault_token_renew|lower }}
+}
+
+template {
+  source      = "{{ renew_nomad_certificates_config_dir }}/templates/nomad_ca.pem.tpl"
+  destination = "{{ renew_nomad_certificates_ca_dest }}"
+  perms       = 0700
+  user        = "{{ renew_nomad_certificates_nomad_user }}"
+  group       = "{{ renew_nomad_certificates_nomad_group }}"
+  command     = "sh -c 'echo \"$(date) Update certificate and key file for {{ renew_nomad_certificates_info['common_name'] }}\" && nomad reload '"
+}
+
+template {
+  source      = "{{ renew_nomad_certificates_config_dir }}/templates/nomad_cert.pem.tpl"
+  destination = "{{ renew_nomad_certificates_cert_dest }}"
+  perms       = 0700
+  user        = "{{ renew_nomad_certificates_nomad_user }}"
+  group       = "{{ renew_nomad_certificates_nomad_group }}"
+  command     = "sh -c 'echo \"$(date) Update certificate and key file for {{ renew_nomad_certificates_info['common_name'] }}\" && nomad reload '"
+}
+
+template {
+  source      = "{{ renew_nomad_certificates_config_dir }}/templates/nomad_key.pem.tpl"
+  destination = "{{ renew_nomad_certificates_key_dest }}"
+  perms       = 0700
+  user        = "{{ renew_nomad_certificates_nomad_user }}"
+  group       = "{{ renew_nomad_certificates_nomad_group }}"
+  command     = "sh -c 'echo \"$(date) Update certificate and key file for {{ renew_nomad_certificates_info['common_name'] }}\" && nomad reload '"
+}
