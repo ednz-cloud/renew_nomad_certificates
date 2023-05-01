@@ -1,0 +1,48 @@
+---
+# task/configure file for renew_nomad_certificates
+- name: "Configure files for nomad certificate renewal"
+  notify:
+    - "systemctl-enable-nomad-certs"
+    - "systemctl-restart-nomad-certs"
+  block:
+    - name: "Copy nomad_config.hcl template"
+      ansible.builtin.template:
+        src: nomad_config.hcl.j2
+        dest: "{{ renew_nomad_certificates_config_dir }}/nomad_config.hcl"
+        owner: "{{ renew_nomad_certificates_nomad_user }}"
+        group: "{{ renew_nomad_certificates_nomad_group }}"
+        mode: '0600'
+
+    - name: "Copy nomad_ca.pem.tpl template"
+      ansible.builtin.template:
+        src: nomad_ca.pem.tpl.j2
+        dest: "{{ renew_nomad_certificates_config_dir }}/templates/nomad_ca.pem.tpl"
+        owner: "{{ renew_nomad_certificates_nomad_user }}"
+        group: "{{ renew_nomad_certificates_nomad_group }}"
+        mode: '0600'
+
+    - name: "Copy nomad_cert.pem.tpl template"
+      ansible.builtin.template:
+        src: nomad_cert.pem.tpl.j2
+        dest: "{{ renew_nomad_certificates_config_dir }}/templates/nomad_cert.pem.tpl"
+        owner: "{{ renew_nomad_certificates_nomad_user }}"
+        group: "{{ renew_nomad_certificates_nomad_group }}"
+        mode: '0600'
+
+    - name: "Copy nomad_cert.key.tpl template"
+      ansible.builtin.template:
+        src: nomad_key.pem.tpl.j2
+        dest: "{{ renew_nomad_certificates_config_dir }}/templates/nomad_key.pem.tpl"
+        owner: "{{ renew_nomad_certificates_nomad_user }}"
+        group: "{{ renew_nomad_certificates_nomad_group }}"
+        mode: '0600'
+
+- name: "Configure nomad-certs systemd service"
+  ansible.builtin.template:
+    src: nomad-certs.service.j2
+    dest: /etc/systemd/system/nomad-certs.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - "systemctl-daemon-reload"

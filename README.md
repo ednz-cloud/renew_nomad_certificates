@@ -1,92 +1,115 @@
-# renew_nomad_certificates
+Renew nomad certificates
+=========
+> This repository is only a mirror. Development and testing is done on a private gitlab server.
 
+This role install consul-template and configure a service to automate renewal of TLS certificates for Hashicorp Nomad on **debian-based** distributions.
 
+Requirements
+------------
 
-## Getting started
+This role assume that you already have installed a nomad server/client on the host, and is only here to assist in automating the certificate renewal process.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+Role Variables
+--------------
+Available variables are listed below, along with default values. A sample file for the default values is available in `default/renew_consul_certificates.yml.sample` in case you need it for any `group_vars` or `host_vars` configuration.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
+```yaml
+renew_consul_certificates_config_dir: /etc/consul-template.d/consul # by default, set to /etc/consul-template.d/consul
 ```
-cd existing_repo
-git remote add origin https://gitlab.ednz.fr/homelab/ansible-resources/roles/renew_nomad_certificates.git
-git branch -M main
-git push -uf origin main
+This variable defines where the files for the role are stored (consul-template configuration + templates).
+
+```yaml
+renew_vault_certificates_consul_user: consul # by default, set to consul
+```
+This variable defines the user that'll be running the certificate renewal service. Defaults to `consul`, and should be present on the host prior to playing this role (ideally when installing consul).
+
+```yaml
+renew_vault_certificates_consul_group: consul # by default, set to consul
+```
+This variable defines the group that'll be running the certificate renewal service. Defaults to `consul`, and should be present on the host prior to playing this role (ideally when installing consul).
+
+```yaml
+renew_vault_certificates_vault_addr: https://127.0.0.1:8200 # by default, set to https://127.0.0.1:8200
+```
+This variable defines the address the consul-template service will query to get the new certificates. Defaults to localhost, but can be changed if vault isnt reachable on localhost.
+
+```yaml
+renew_vault_certificates_vault_token: mysupersecretvaulttokenthatyoushouldchange # by default, set to a dummy string
+```
+This variable defines the vault token top use to access vault and renew the certificate. Default is a dummy string to pass unit tests.
+
+```yaml
+renew_vault_certificates_vault_token_unwrap: false # by default, set to false
+```
+Defines whether or not the token is wrapped and should be unwrapped (this is an enterprise-only feature of vault at the moment).
+
+```yaml
+renew_vault_certificates_vault_token_renew: true # by default, set to true
+```
+This variable defines whether or not to renew the vault token. It should probably be `true`, and you should have a periodic token to handle this.
+
+```yaml
+renew_consul_certificates_ca_dest: /opt/consul/tls/ca.pem # by default, set to /opt/consul/tls/ca.pem
+```
+This variable defines where to copy the certificate authority upon renewal. Default to `/opt/consul/tls/ca.pem` but should be changed depending on where you store the certificate authority.
+
+```yaml
+renew_vault_certificates_cert_dest: /opt/consul/tls/cert.pem # by default, set to /opt/consul/tls/cert.pem
+```
+This variable defines where to copy the certificates upon renewal. Default to `/opt/consul/tls/cert.pem` but should be changed depending on where you store the certificates.
+
+```yaml
+renew_consul_certificates_key_dest: /opt/consul/tls/key.pem # by default, set to /opt/consul/tls/cert.pem
+```
+This variable defines where to copy the private keys upon renewal. Default to `/opt/consul/tls/key.pem` but should be changed depending on where you store the keys.
+
+```yaml
+renew_consul_certificates_info: # by default, set to:
+  issuer_path: pki/issue/your-issuer
+  common_name: consul01.example.com
+  ttl: 90d
+  is_server: false
+  include_consul_service: false
+```
+This variable defines the path on vault to retrieve the certificates, as well as the common name and TTL to use for it. It can also include consul aliases in case you have registered consul services in itself (`consul.service.consul`). It also handles whether or not to append the server.yourdc.consul SAN, in case you're enforcing hostname checking.
+
+```yaml
+renew_consul_certificates_consul_dc_name: dc1.consul # by default, set to dc1.consul
+```
+In case you enforce hostname checking, set this variable to your desired dc and consul domain. This is used to forge the SAN that will be checked by consul to only allow specific nodes to be managers.
+
+```yaml
+renew_consul_certificates_consul_service_name: consul.service.consul # by default, set to consul.service.consul
+```
+This variable defines the consul service name in consul. Default is `consul.service.consul`
+
+```yaml
+renew_consul_certificates_start_service: false
+```
+This variable defines whether or not to start the service after creating it. By default, it is only enabled, but not started, in case you're building golden images (in which case you probably don't want a certificate generated during the build process).
+
+Dependencies
+------------
+
+This role has a task that installs its own dependencies located in `task/prerequisites.yml`, so that you don't need to manage them. This role requires both `ednxzu.manage_repositories` and `ednxzu.manage_apt_packages` to install consul-template.
+
+Example Playbook
+----------------
+
+Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+```yaml
+# calling the role inside a playbook with either the default or group_vars/host_vars
+- hosts: servers
+  roles:
+    - ednxzu.renew_consul_certificates
 ```
 
-## Integrate with your tools
+License
+-------
 
-- [ ] [Set up project integrations](https://gitlab.ednz.fr/homelab/ansible-resources/roles/renew_nomad_certificates/-/settings/integrations)
+MIT / BSD
 
-## Collaborate with your team
+Author Information
+------------------
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+This role was created by Bertrand Lanson in 2023.

@@ -1,0 +1,15 @@
+---
+# task/install file for renew_nomad_certificates
+- name: "Configure hashicorp repository"
+  ansible.builtin.include_role:
+    name: ednxzu.manage_repositories
+  vars:
+    manage_repositories_enable_default_repo: false
+    manage_repositories_enable_custom_repo: true
+    manage_repositories_custom_repo: "{{ renew_nomad_certificates_repository }}"
+
+- name: "Install nomad-template"
+  ansible.builtin.include_role:
+    name: ednxzu.manage_apt_packages
+  vars:
+    manage_apt_packages_list: "{{ renew_nomad_certificates_packages }}"
