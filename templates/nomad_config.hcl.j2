@@ -11,7 +11,7 @@ template {
   perms       = 0700
   user        = "{{ renew_nomad_certificates_nomad_user }}"
   group       = "{{ renew_nomad_certificates_nomad_group }}"
-  command     = "sh -c 'echo \"$(date) Update certificate and key file for {{ renew_nomad_certificates_info['common_name'] }}\" && nomad reload '"
+  command     = "sh -c 'echo \"$(date) Update certificate and key file for {{ renew_nomad_certificates_info['common_name'] }}\" && pkill -SIGHUP nomad '"
 }
 
 template {
@@ -20,7 +20,7 @@ template {
   perms       = 0700
   user        = "{{ renew_nomad_certificates_nomad_user }}"
   group       = "{{ renew_nomad_certificates_nomad_group }}"
-  command     = "sh -c 'echo \"$(date) Update certificate and key file for {{ renew_nomad_certificates_info['common_name'] }}\" && nomad reload '"
+  command     = "sh -c 'echo \"$(date) Update certificate and key file for {{ renew_nomad_certificates_info['common_name'] }}\" && pkill -SIGHUP nomad '"
 }
 
 template {
@@ -29,5 +29,5 @@ template {
   perms       = 0700
   user        = "{{ renew_nomad_certificates_nomad_user }}"
   group       = "{{ renew_nomad_certificates_nomad_group }}"
-  command     = "sh -c 'echo \"$(date) Update certificate and key file for {{ renew_nomad_certificates_info['common_name'] }}\" && nomad reload '"
+  command     = "sh -c 'echo \"$(date) Update certificate and key file for {{ renew_nomad_certificates_info['common_name'] }}\" && pkill -SIGHUP nomad '"
 }
