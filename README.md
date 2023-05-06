@@ -64,7 +64,7 @@ renew_nomad_certificates_key_dest: /opt/nomad/tls/key.pem # by default, set to /
 This variable defines where to copy the private keys upon renewal. Default to `/opt/nomad/tls/key.pem` but should be changed depending on where you store the keys.
 
 ```yaml
-renew_nomad_certificates_info: # by default, set to:
+renew_nomad_certificates_info: # by default, set to the following
   issuer_path: pki/issue/your-issuer
   common_name: consul01.example.com
   ttl: 90d
