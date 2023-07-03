@@ -10,7 +10,7 @@ renew_nomad_certificates_ca_dest: /opt/nomad/tls/ca.pem
 renew_nomad_certificates_cert_dest: /opt/nomad/tls/cert.pem
 renew_nomad_certificates_key_dest: /opt/nomad/tls/key.pem
 renew_nomad_certificates_info:
-  issuer_path: pki/issue/your-issuer
+  issuer_path: pki/issue/your-ca-int
   common_name: nomad01.example.com
   ttl: 90d
   is_server: true

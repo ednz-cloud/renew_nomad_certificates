@@ -78,7 +78,7 @@
         - name: "Verify file /etc/consul-template.d/nomad/templates/nomad_ca.pem.tpl"
           vars:
             nomad_ca_file: |
-              {% raw %}{{ with secret "pki/issue/your-issuer" "common_name=nomad01.example.com" "ttl=90d" "alt_names=localhost,server.dc1.nomad,client.dc1.nomad,nomad.service.nomad" "ip_sans=127.0.0.1" }}
+              {% raw %}{{ with secret "pki/issue/your-ca-int" "common_name=nomad01.example.com" "ttl=90d" "alt_names=localhost,server.dc1.nomad,client.dc1.nomad,nomad.service.nomad" "ip_sans=127.0.0.1" }}
               {{ .Data.issuing_ca }}
               {{ end }}{% endraw %}
           ansible.builtin.assert:
@@ -94,7 +94,7 @@
         - name: "Verify file /etc/consul-template.d/nomad/templates/nomad_cert.pem.tpl"
           vars:
             nomad_cert_file: |
-              {% raw %}{{ with secret "pki/issue/your-issuer" "common_name=nomad01.example.com" "ttl=90d" "alt_names=localhost,server.dc1.nomad,client.dc1.nomad,nomad.service.nomad" "ip_sans=127.0.0.1" }}
+              {% raw %}{{ with secret "pki/issue/your-ca-int" "common_name=nomad01.example.com" "ttl=90d" "alt_names=localhost,server.dc1.nomad,client.dc1.nomad,nomad.service.nomad" "ip_sans=127.0.0.1" }}
               {{ .Data.certificate }}
               {{ .Data.issuing_ca }}
               {{ end }}{% endraw %}
@@ -111,7 +111,7 @@
         - name: "Verify file /etc/consul-template.d/nomad/templates/nomad_key.pem.tpl"
           vars:
             nomad_key_file: |
-              {% raw %}{{ with secret "pki/issue/your-issuer" "common_name=nomad01.example.com" "ttl=90d" "alt_names=localhost,server.dc1.nomad,client.dc1.nomad,nomad.service.nomad" "ip_sans=127.0.0.1" }}
+              {% raw %}{{ with secret "pki/issue/your-ca-int" "common_name=nomad01.example.com" "ttl=90d" "alt_names=localhost,server.dc1.nomad,client.dc1.nomad,nomad.service.nomad" "ip_sans=127.0.0.1" }}
               {{ .Data.private_key }}
               {{ end }}{% endraw %}
           ansible.builtin.assert:
