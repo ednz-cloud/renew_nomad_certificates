@@ -1,0 +1,154 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: "Test: file /etc/hosts"
+      block:
+        - name: "Stat file /etc/hosts"
+          ansible.builtin.stat:
+            path: "/etc/hosts"
+          register: stat_etc_hosts
+
+        - name: "Verify file /etc/hosts"
+          ansible.builtin.assert:
+            that:
+              - stat_etc_hosts.stat.exists
+              - stat_etc_hosts.stat.isreg
+              - stat_etc_hosts.stat.pw_name == 'root'
+              - stat_etc_hosts.stat.gr_name == 'root'
+
+    - name: "Test: directory /etc/consul-template.d/nomad"
+      block:
+        - name: "Stat directory /etc/consul-template.d/nomad"
+          ansible.builtin.stat:
+            path: "/etc/consul-template.d/nomad"
+          register: stat_etc_consul_template_d_nomad
+
+        - name: "Stat file /etc/consul-template.d/nomad/nomad_config.hcl"
+          ansible.builtin.stat:
+            path: "/etc/consul-template.d/nomad/nomad_config.hcl"
+          register: stat_etc_consul_template_d_nomad_nomad_config_hcl
+
+        - name: "Slurp file /etc/consul-template.d/nomad/nomad_config.hcl"
+          ansible.builtin.slurp:
+            src: "/etc/consul-template.d/nomad/nomad_config.hcl"
+          register: slurp_etc_consul_template_d_nomad_nomad_config_hcl
+
+        - name: "Verify directory /etc/consul-template.d/nomad"
+          ansible.builtin.assert:
+            that:
+              - stat_etc_consul_template_d_nomad.stat.exists
+              - stat_etc_consul_template_d_nomad.stat.isdir
+              - stat_etc_consul_template_d_nomad.stat.pw_name == 'nomad'
+              - stat_etc_consul_template_d_nomad.stat.gr_name == 'nomad'
+              - stat_etc_consul_template_d_nomad.stat.mode == '0755'
+              - stat_etc_consul_template_d_nomad_nomad_config_hcl.stat.exists
+              - stat_etc_consul_template_d_nomad_nomad_config_hcl.stat.isreg
+              - stat_etc_consul_template_d_nomad_nomad_config_hcl.stat.pw_name == 'nomad'
+              - stat_etc_consul_template_d_nomad_nomad_config_hcl.stat.gr_name == 'nomad'
+              - stat_etc_consul_template_d_nomad_nomad_config_hcl.stat.mode == '0600'
+              - slurp_etc_consul_template_d_nomad_nomad_config_hcl.content != ''
+
+    - name: "Test: directory /etc/consul-template.d/nomad/templates"
+      block:
+        - name: "Stat directory /etc/consul-template.d/nomad/templates"
+          ansible.builtin.stat:
+            path: "/etc/consul-template.d/nomad/templates"
+          register: stat_etc_consul_template_d_nomad_templates
+
+        - name: "Find in directory /etc/consul-template.d/nomad/templates"
+          ansible.builtin.find:
+            paths: "/etc/consul-template.d/nomad/templates"
+            file_type: file
+          register: find_etc_consul_template_d_nomad_templates
+
+        - name: "Stat in directory /etc/consul-template.d/nomad/templates"
+          ansible.builtin.stat:
+            path: "{{ item.path }}"
+          loop: "{{ find_etc_consul_template_d_nomad_templates.files }}"
+          register: stat_etc_consul_template_d_nomad_templates
+
+        - name: "Slurp in directory /etc/consul-template.d/nomad/templates"
+          ansible.builtin.slurp:
+            src: "{{ item.path }}"
+          loop: "{{ find_etc_consul_template_d_nomad_templates.files }}"
+          register: slurp_etc_consul_template_d_nomad_templates
+
+        - name: "Verify file /etc/consul-template.d/nomad/templates/nomad_ca.pem.tpl"
+          vars:
+            nomad_ca_file: |
+              {% raw %}{{ with secret "pki/issue/your-issuer" "common_name=nomad01.example.com" "ttl=90d" "alt_names=localhost" "ip_sans=127.0.0.1" }}
+              {{ .Data.issuing_ca }}
+              {{ end }}{% endraw %}
+          ansible.builtin.assert:
+            that:
+              - item.item.isreg
+              - item.item.pw_name == 'nomad'
+              - item.item.gr_name == 'nomad'
+              - item.item.mode == '0600'
+              - "(item.content|b64decode) == nomad_ca_file"
+          loop: "{{ slurp_etc_consul_template_d_nomad_templates.results }}"
+          when: (item.item.path | basename) == 'nomad_ca.pem.tpl'
+
+        - name: "Verify file /etc/consul-template.d/nomad/templates/nomad_cert.pem.tpl"
+          vars:
+            nomad_cert_file: |
+              {% raw %}{{ with secret "pki/issue/your-issuer" "common_name=nomad01.example.com" "ttl=90d" "alt_names=localhost" "ip_sans=127.0.0.1" }}
+              {{ .Data.certificate }}
+              {{ .Data.issuing_ca }}
+              {{ end }}{% endraw %}
+          ansible.builtin.assert:
+            that:
+              - item.item.isreg
+              - item.item.pw_name == 'nomad'
+              - item.item.gr_name == 'nomad'
+              - item.item.mode == '0600'
+              - "(item.content|b64decode) == nomad_cert_file"
+          loop: "{{ slurp_etc_consul_template_d_nomad_templates.results }}"
+          when: (item.item.path | basename) == 'nomad_cert.pem.tpl'
+
+        - name: "Verify file /etc/consul-template.d/nomad/templates/nomad_key.pem.tpl"
+          vars:
+            nomad_key_file: |
+              {% raw %}{{ with secret "pki/issue/your-issuer" "common_name=nomad01.example.com" "ttl=90d" "alt_names=localhost" "ip_sans=127.0.0.1" }}
+              {{ .Data.private_key }}
+              {{ end }}{% endraw %}
+          ansible.builtin.assert:
+            that:
+              - item.item.isreg
+              - item.item.pw_name == 'nomad'
+              - item.item.gr_name == 'nomad'
+              - item.item.mode == '0600'
+              - "(item.content|b64decode) == nomad_key_file"
+          loop: "{{ slurp_etc_consul_template_d_nomad_templates.results }}"
+          when: (item.item.path | basename) == 'nomad_key.pem.tpl'
+
+    - name: "Test: service nomad-certs"
+      block:
+        - name: "Get service nomad-certs"
+          ansible.builtin.service_facts:
+
+        - name: "Stat file /etc/systemd/system/nomad-certs.service"
+          ansible.builtin.stat:
+            path: "/etc/systemd/system/nomad-certs.service"
+          register: stat_etc_systemd_system_nomad_certs_service
+
+        - name: "Slurp file /etc/systemd/system/nomad.service"
+          ansible.builtin.slurp:
+            src: "/etc/systemd/system/nomad-certs.service"
+          register: slurp_etc_systemd_system_nomad_certs_service
+
+        - name: "Verify service nomad"
+          ansible.builtin.assert:
+            that:
+              - stat_etc_systemd_system_nomad_certs_service.stat.exists
+              - stat_etc_systemd_system_nomad_certs_service.stat.isreg
+              - stat_etc_systemd_system_nomad_certs_service.stat.pw_name == 'root'
+              - stat_etc_systemd_system_nomad_certs_service.stat.gr_name == 'root'
+              - stat_etc_systemd_system_nomad_certs_service.stat.mode == '0644'
+              - slurp_etc_systemd_system_nomad_certs_service.content != ''
+              - ansible_facts.services['nomad-certs.service'] is defined
+              - ansible_facts.services['nomad-certs.service']['source'] == 'systemd'
+              - ansible_facts.services['nomad-certs.service']['state'] == 'stopped'
+              - ansible_facts.services['nomad-certs.service']['status'] == 'enabled'

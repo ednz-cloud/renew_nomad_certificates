@@ -1,4 +1,4 @@
-Renew nomad certificates
+renew_nomad_certificates
 =========
 > This repository is only a mirror. Development and testing is done on a private gitlab server.
 
