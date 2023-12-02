@@ -3,21 +3,6 @@
   hosts: all
   gather_facts: false
   tasks:
-    - name: "Test: file /etc/hosts"
-      block:
-        - name: "Stat file /etc/hosts"
-          ansible.builtin.stat:
-            path: "/etc/hosts"
-          register: stat_etc_hosts
-
-        - name: "Verify file /etc/hosts"
-          ansible.builtin.assert:
-            that:
-              - stat_etc_hosts.stat.exists
-              - stat_etc_hosts.stat.isreg
-              - stat_etc_hosts.stat.pw_name == 'root'
-              - stat_etc_hosts.stat.gr_name == 'root'
-
     - name: "Test: directory /etc/consul-template.d/nomad"
       block:
         - name: "Stat directory /etc/consul-template.d/nomad"
@@ -34,6 +19,7 @@
           ansible.builtin.slurp:
             src: "/etc/consul-template.d/nomad/nomad_config.hcl"
           register: slurp_etc_consul_template_d_nomad_nomad_config_hcl
+          become: true
 
         - name: "Verify directory /etc/consul-template.d/nomad"
           ansible.builtin.assert:
@@ -74,6 +60,7 @@
             src: "{{ item.path }}"
           loop: "{{ find_etc_consul_template_d_nomad_templates.files }}"
           register: slurp_etc_consul_template_d_nomad_templates
+          become: true
 
         - name: "Verify file /etc/consul-template.d/nomad/templates/nomad_ca.pem.tpl"
           vars:
@@ -138,6 +125,7 @@
           ansible.builtin.slurp:
             src: "/etc/systemd/system/nomad-certs.service"
           register: slurp_etc_systemd_system_nomad_certs_service
+          become: true
 
         - name: "Verify service nomad"
           ansible.builtin.assert:

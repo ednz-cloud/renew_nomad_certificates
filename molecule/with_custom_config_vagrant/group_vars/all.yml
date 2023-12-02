@@ -1,0 +1,21 @@
+---
+renew_nomad_certificates_config_dir: /etc/consul-template.d/nomad
+renew_nomad_certificates_nomad_user: nomad
+renew_nomad_certificates_nomad_group: nomad
+renew_nomad_certificates_vault_addr: "https://vault.example.com"
+renew_nomad_certificates_vault_token: mysupersecretnomadtokenthatyoushouldchange
+renew_nomad_certificates_vault_token_unwrap: false
+renew_nomad_certificates_vault_token_renew: true
+renew_nomad_certificates_ca_dest: /opt/nomad/tls/ca.pem
+renew_nomad_certificates_cert_dest: /opt/nomad/tls/cert.pem
+renew_nomad_certificates_key_dest: /opt/nomad/tls/key.pem
+renew_nomad_certificates_info:
+  issuer_path: pki/issue/your-ca-int
+  common_name: nomad01.example.com
+  ttl: 90d
+  is_server: true
+  is_client: true
+  include_nomad_service: true
+renew_nomad_certificates_nomad_dc_name: dc1.nomad
+renew_nomad_certificates_nomad_service_name: nomad.service.nomad
+renew_nomad_certificates_start_service: false
