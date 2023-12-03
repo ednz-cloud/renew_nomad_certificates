@@ -3,14 +3,12 @@
 - name: "Reload service file"
   ansible.builtin.systemd:
     daemon_reload: true
-  become: true
   listen: "systemctl-daemon-reload"
 
 - name: "Enable nomad-certs service"
   ansible.builtin.service:
     name: nomad-certs
     enabled: true
-  become: true
   listen: "systemctl-enable-nomad-certs"
 
 - name: "Start nomad-certs service"
@@ -19,4 +17,3 @@
     state: restarted
   listen: "systemctl-restart-nomad-certs"
   when: renew_nomad_certificates_start_service
-  become: true

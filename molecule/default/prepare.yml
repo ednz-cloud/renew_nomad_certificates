@@ -1,12 +1,12 @@
 ---
 - name: Prepare
   hosts: all
+  become: true
   tasks:
     - name: "Create group nomad"
       ansible.builtin.group:
         name: "nomad"
         state: present
-      become: true
 
     - name: "Create user nomad"
       ansible.builtin.user:
@@ -14,4 +14,3 @@
         group: "nomad"
         shell: /bin/false
         state: present
-      become: true

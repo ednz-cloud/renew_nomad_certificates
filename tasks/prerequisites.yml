@@ -7,7 +7,6 @@
     owner: "{{ renew_nomad_certificates_nomad_user }}"
     group: "{{ renew_nomad_certificates_nomad_group }}"
     mode: '0755'
-  become: true
 
 - name: "Create directory templates directory in {{ renew_nomad_certificates_config_dir }}"
   ansible.builtin.file:
@@ -16,7 +15,6 @@
     owner: "{{ renew_nomad_certificates_nomad_user }}"
     group: "{{ renew_nomad_certificates_nomad_group }}"
     mode: '0755'
-  become: true
 
 - name: "Ensure certificate/key directory(ies) exist(s)"
   ansible.builtin.file:
@@ -29,4 +27,3 @@
     - "{{ renew_nomad_certificates_cert_dest }}"
     - "{{ renew_nomad_certificates_key_dest }}"
     - "{{ renew_nomad_certificates_ca_dest }}"
-  become: true

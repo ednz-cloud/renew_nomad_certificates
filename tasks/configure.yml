@@ -1,7 +1,6 @@
 ---
 # task/configure file for renew_nomad_certificates
 - name: "Configure files for nomad certificate renewal"
-  become: true
   notify:
     - "systemctl-enable-nomad-certs"
     - "systemctl-restart-nomad-certs"
@@ -45,6 +44,5 @@
     owner: root
     group: root
     mode: '0644'
-  become: true
   notify:
     - "systemctl-daemon-reload"
