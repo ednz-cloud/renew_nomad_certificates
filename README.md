@@ -92,8 +92,8 @@ This variable defines whether or not to start the service after creating it. By 
 Dependencies
 ------------
 
-`ednxzu.manage_repositories` to configure hashicorp apt repository.
-`ednxzu.manage_apt_packages` to install consul-template.
+`ednz_cloud.manage_repositories` to configure hashicorp apt repository.
+`ednz_cloud.manage_apt_packages` to install consul-template.
 
 Example Playbook
 ----------------
@@ -103,7 +103,7 @@ Including an example of how to use your role (for instance, with variables passe
 # calling the role inside a playbook with either the default or group_vars/host_vars
 - hosts: servers
   roles:
-    - ednxzu.renew_nomad_certificates
+    - ednz_cloud.renew_nomad_certificates
 ```
 
 License
